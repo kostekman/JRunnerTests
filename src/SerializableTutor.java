@@ -1,12 +1,8 @@
 import static org.junit.Assert.*;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -14,7 +10,7 @@ import org.junit.Test;
 
 public class SerializableTutor{
 
-    private static final String FILE_OBJECT_DATA = "files/object.data";
+    private static final String FILE_OBJECT_DATA = "object.data";
 
     /**
      * Should write the data of Person to file FILE_OBJECT_DATA,
@@ -22,6 +18,15 @@ public class SerializableTutor{
      * @param person
      */
     public void writeToFile(Person person) {
+        try(FileOutputStream fos = new FileOutputStream(FILE_OBJECT_DATA);
+            ObjectOutputStream oos = new ObjectOutputStream(fos)){
+
+            oos.writeObject(person);
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
     }
 
     /**
@@ -29,8 +34,18 @@ public class SerializableTutor{
      * @return
      */
     public Person readFromFile() {
-        Person person = null;
-        return person;
+        try(FileInputStream fis = new FileInputStream(FILE_OBJECT_DATA);
+            ObjectInputStream ois = new ObjectInputStream(fis)){
+
+            return (Person)ois.readObject();
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Test
@@ -45,12 +60,7 @@ public class SerializableTutor{
         assertFalse("Name age was not marked as transient",
                 person.age.equals(personFromFile.age));
     }
-
-    /**
-     * Uncomment @Test and edit class Address,
-     * so that it allows the address serialization
-     */
-    //@Test
+    @Test
     public void testPersonAddressSerialize() {
         Person person = new Person("John Johnes", new Date("2000/10/10"));
         Address address = new Address("New York", "Water street", 10);
@@ -76,11 +86,14 @@ public class SerializableTutor{
      * Make the class static, implement Serializable
      * and mark the field age as transient
      */
-    class Person {
+    static class Person implements Serializable{
         public String name;
         public Date birthdate;
         public List<Address> addressList = new ArrayList<SerializableTutor.Address>();
-        Integer age;
+        transient Integer age;
+
+        public Person(){
+        }
 
         public Person(String name, Date birthdate) {
             super();
@@ -94,10 +107,13 @@ public class SerializableTutor{
         }
     }
 
-    class Address {
+    static class Address implements Serializable{
         public String city;
         public String street;
         public Integer appartment;
+
+        public Address(){}
+
         public Address(String city, String street, Integer appartment) {
             super();
             this.city = city;
