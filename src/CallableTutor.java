@@ -31,7 +31,7 @@ public class CallableTutor {
 
         // try to cancel 5 of 10 threads here
         for (int i=0;i<5;i++) {
-            log("cancelling thread "+i);
+            System.out.println("cancelling thread "+i);
             results.get(i).cancel(true);
         }
 
@@ -44,6 +44,8 @@ public class CallableTutor {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (CancellationException e) {
                 e.printStackTrace();
             }
         }
